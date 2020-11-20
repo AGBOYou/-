@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+          http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+">
+
+    
+    <!--Spring实现的另外一种方式：使用注解-->
+    <!--自动扫描包，将注解的类自动注册为bean-->
+    <context:component-scan base-package="com.qdu.dao,com.qdu.service"/>
+    <!--通过<context:property-placeholder/>标记加载一个属性文件-->
+    <context:property-placeholder location="classpath:properties/jdbc.properties"/>
+    <!--Spring和和ibernate集成的话，尽量将数据源配置到Spring的配置文件中-->
+     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+         <property name="driverClassName" value="${jdbc.driverClass}"/>
+         <property name="url" value="${jdbc.url}"/>
+         <property name="username" value="${jdbc.username}"/>
+         <property name="password" value="${jdbc.password}"/>
+         
+     </bean>
+    
+    <!--将Hibernate框架的SessionFactory注册为Spring的bean-->
+    <bean id="springSessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="annotatedClasses">
+            <list>
+                <value>com.qdu.pojo.Module</value>
+                <value>com.qdu.pojo.Admin</value>
+                <value>com.qdu.pojo.Cart</value>
+                <value>com.qdu.pojo.Comment</value>
+                <value>com.qdu.pojo.Order</value>
+                <value>com.qdu.pojo.OrderDetails</value>
+                <value>com.qdu.pojo.User</value>
+                <value>com.qdu.pojo.Products</value>   
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2012Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.fomat_sql">true</prop>
+            </props>
+            
+        </property>
+    </bean>
+    
+    
+    <bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="springSessionFactory"/>
+    </bean>
+    
+   <tx:annotation-driven transaction-manager="txManager"/>
+   
+  
+</beans>
